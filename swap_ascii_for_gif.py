@@ -1,3 +1,17 @@
+"""
+swap_ascii_for_gif.py
+
+Troca a arte ASCII (bloco <text class="ascii">) dos SVGs do template
+"neofetch style" (dark_mode.svg / light_mode.svg) por um GIF embutido
+como base64, mantendo intactos os dados dinâmicos gerados pelo today.py.
+
+Uso:
+    python swap_ascii_for_gif.py caminho/para/seu.gif
+
+Rode este script dentro da pasta do seu fork clonado (onde estão
+dark_mode.svg e light_mode.svg). Ele sobrescreve os dois arquivos.
+"""
+
 import base64
 import re
 import sys
@@ -8,10 +22,14 @@ ASCII_BLOCK_PATTERN = re.compile(
     re.DOTALL,
 )
 
+EXISTING_IMAGE_PATTERN = re.compile(
+    r'<image x="15" y="15"[^>]*/>',
+)
+
 IMG_X, IMG_Y = 15, 15
 IMG_WIDTH, IMG_HEIGHT = 360, 500
 
-FIT_MODE = "slice"  # troque para "meet" se preferir
+FIT_MODE = "slice" 
 
 
 def build_image_tag(gif_path: Path) -> str:
@@ -39,12 +57,15 @@ def swap_in_file(svg_path: Path, image_tag: str) -> None:
 
     svg_text = svg_path.read_text(encoding="utf-8")
 
-    if not ASCII_BLOCK_PATTERN.search(svg_text):
-        print(f"Aviso: bloco da arte ASCII não encontrado em {svg_path.name} "
-              f"(talvez já tenha sido editado antes?). Nenhuma mudança feita.")
+    if ASCII_BLOCK_PATTERN.search(svg_text):
+        new_svg = ASCII_BLOCK_PATTERN.sub(image_tag, svg_text, count=1)
+    elif EXISTING_IMAGE_PATTERN.search(svg_text):
+        new_svg = EXISTING_IMAGE_PATTERN.sub(image_tag, svg_text, count=1)
+    else:
+        print(f"Aviso: nem a arte ASCII nem uma imagem anterior foram "
+              f"encontradas em {svg_path.name}. Nenhuma mudança feita.")
         return
 
-    new_svg = ASCII_BLOCK_PATTERN.sub(image_tag, svg_text, count=1)
     svg_path.write_text(new_svg, encoding="utf-8")
     print(f"OK: {svg_path.name} atualizado com o GIF.")
 
