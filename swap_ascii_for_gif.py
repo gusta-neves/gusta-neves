@@ -1,17 +1,3 @@
-"""
-swap_ascii_for_gif.py
-
-Troca a arte ASCII (bloco <text class="ascii">) dos SVGs do template
-"neofetch style" (dark_mode.svg / light_mode.svg) por um GIF embutido
-como base64, mantendo intactos os dados dinâmicos gerados pelo today.py.
-
-Uso:
-    python swap_ascii_for_gif.py caminho/para/seu.gif
-
-Rode este script dentro da pasta do seu fork clonado (onde estão
-dark_mode.svg e light_mode.svg). Ele sobrescreve os dois arquivos.
-"""
-
 import base64
 import re
 import sys
